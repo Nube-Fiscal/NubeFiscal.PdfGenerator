@@ -57,18 +57,26 @@ public static class PdfBuilder
 
             bool esComplementoPago = string.Equals(cfdi.TipoComprobante, "P", StringComparison.OrdinalIgnoreCase)
                                      && cfdi.ComplementoPago is not null;
+            bool esNomina = string.Equals(cfdi.TipoComprobante, "N", StringComparison.OrdinalIgnoreCase)
+                            && cfdi.ComplementoNomina is not null;
 
-            col.Item().PaddingTop(10).PaddingBottom(18).PaddingLeft(4).PaddingRight(4).Row(row =>
+            if (!esNomina)
             {
-                row.RelativeItem().Element(container => ComposeDatosPagoBox(container, cfdi, esComplementoPago));
-                row.ConstantItem(236).PaddingLeft(6).Element(container => ComposeTotalesBox(container, cfdi));
-            });
+                col.Item().PaddingTop(10).PaddingBottom(18).PaddingLeft(4).PaddingRight(4).Row(row =>
+                {
+                    row.RelativeItem().Element(container => ComposeDatosPagoBox(container, cfdi, esComplementoPago));
+                    row.ConstantItem(236).PaddingLeft(6).Element(container => ComposeTotalesBox(container, cfdi));
+                });
+            }
 
             if (esComplementoPago)
             {
                 col.Item().PaddingTop(4).Element(container => ComposeComplementoPago(container, cfdi));
                 col.Item().PageBreak();
             }
+
+            if (esNomina)
+                col.Item().PaddingTop(6).Element(container => ComposeComplementoNomina(container, cfdi));
 
             col.Item().PaddingTop(6).Element(container => ComposeFinalSection(container, cfdi, qrBytes));
         });
@@ -403,6 +411,270 @@ public static class PdfBuilder
             });
         });
     }
+
+    private static void ComposeComplementoNomina(IContainer container, CfdiPdfData cfdi)
+    {
+        var n = cfdi.ComplementoNomina!;
+
+        static IContainer TH(IContainer c) =>
+            c.Background("#CFCFCF").Border(0.5f).Padding(2).AlignMiddle().AlignCenter();
+        static IContainer TD(IContainer c) =>
+            c.Border(0.5f).Padding(2).AlignMiddle();
+        static IContainer TDR(IContainer c) =>
+            c.Border(0.5f).Padding(2).AlignMiddle().AlignRight();
+        static IContainer TDC(IContainer c) =>
+            c.Border(0.5f).Padding(2).AlignMiddle().AlignCenter();
+        static IContainer TotRow(IContainer c) =>
+            c.Background("#F2F2F2").Border(0.5f).Padding(2).AlignMiddle().AlignRight();
+
+        container.PaddingLeft(4).PaddingRight(4).Column(col =>
+        {
+            col.Item().PaddingBottom(4).Text("Nómina").Bold().FontSize(9f);
+
+            // ── Periodo ──────────────────────────────────────────────────────
+            col.Item().PaddingBottom(6).Table(table =>
+            {
+                table.ColumnsDefinition(c =>
+                {
+                    c.RelativeColumn(); c.RelativeColumn(); c.RelativeColumn(); c.RelativeColumn();
+                });
+
+                table.Cell().Element(TH).Text("Tipo de nómina").Bold().FontSize(6f);
+                table.Cell().Element(TH).Text("Fecha de pago").Bold().FontSize(6f);
+                table.Cell().Element(TH).Text("Periodo de pago").Bold().FontSize(6f);
+                table.Cell().Element(TH).Text("Días pagados").Bold().FontSize(6f);
+
+                table.Cell().Element(TDC).Text(DescripcionTipoNomina(n.TipoNomina)).FontSize(6f);
+                table.Cell().Element(TDC).Text(n.FechaPago.HasValue ? n.FechaPago.Value.ToString("dd/MM/yyyy") : "-").FontSize(6f);
+                var periodo = n.FechaInicialPago.HasValue && n.FechaFinalPago.HasValue
+                    ? $"{n.FechaInicialPago.Value:dd/MM/yyyy} – {n.FechaFinalPago.Value:dd/MM/yyyy}"
+                    : "-";
+                table.Cell().Element(TDC).Text(periodo).FontSize(6f);
+                table.Cell().Element(TDC).Text(n.NumDiasPagados.HasValue ? n.NumDiasPagados.Value.ToString("G29", CultureInfo.InvariantCulture) : "-").FontSize(6f);
+            });
+
+            // ── Datos del patrón y del empleado ─────────────────────────────
+            col.Item().PaddingBottom(6).Row(row =>
+            {
+                // Patrón
+                row.RelativeItem().Column(patron =>
+                {
+                    patron.Item().Background("#CFCFCF").Border(0.5f).Padding(2)
+                          .Text("Datos del patrón").Bold().FontSize(7f);
+                    patron.Item().Element(c => NominaField(c, "Registro patronal:", n.RegistroPatronal));
+                });
+
+                row.ConstantItem(6);
+
+                // Empleado
+                row.RelativeItem(3).Column(emp =>
+                {
+                    emp.Item().Background("#CFCFCF").Border(0.5f).Padding(2)
+                       .Text("Datos del empleado").Bold().FontSize(7f);
+                    emp.Item().Row(r =>
+                    {
+                        r.RelativeItem().Column(left =>
+                        {
+                            left.Item().Element(c => NominaField(c, "Núm. empleado:", n.NumEmpleado));
+                            left.Item().Element(c => NominaField(c, "CURP:", n.Curp));
+                            left.Item().Element(c => NominaField(c, "NSS:", n.NumSeguridadSocial));
+                            left.Item().Element(c => NominaField(c, "Inicio rel. laboral:", n.FechaInicioRelLaboral.HasValue ? n.FechaInicioRelLaboral.Value.ToString("dd/MM/yyyy") : null));
+                            left.Item().Element(c => NominaField(c, "Antigüedad:", n.Antiguedad));
+                            left.Item().Element(c => NominaField(c, "Entidad federativa:", n.ClaveEntFed));
+                        });
+                        r.ConstantItem(6);
+                        r.RelativeItem().Column(right =>
+                        {
+                            right.Item().Element(c => NominaField(c, "Departamento:", n.Departamento));
+                            right.Item().Element(c => NominaField(c, "Puesto:", n.Puesto));
+                            right.Item().Element(c => NominaField(c, "Tipo de contrato:", DescripcionTipoContrato(n.TipoContrato)));
+                            right.Item().Element(c => NominaField(c, "Tipo de jornada:", DescripcionTipoJornada(n.TipoJornada)));
+                            right.Item().Element(c => NominaField(c, "Periodicidad:", DescripcionPeriodicidadPago(n.PeriodicidadPago)));
+                            right.Item().Element(c => NominaField(c, "Sal. base cot. apor.:", n.SalarioBaseCotApor.HasValue ? FormatMoney(n.SalarioBaseCotApor.Value) : null));
+                            right.Item().Element(c => NominaField(c, "Sal. diario integrado:", n.SalarioDiarioIntegrado.HasValue ? FormatMoney(n.SalarioDiarioIntegrado.Value) : null));
+                        });
+                    });
+                });
+            });
+
+            // ── Percepciones ─────────────────────────────────────────────────
+            if (n.Percepciones.Count > 0)
+            {
+                col.Item().PaddingBottom(2).Text("Percepciones").Bold().FontSize(8f);
+                col.Item().PaddingBottom(6).Table(table =>
+                {
+                    table.ColumnsDefinition(c =>
+                    {
+                        c.ConstantColumn(30); c.ConstantColumn(36); c.RelativeColumn();
+                        c.ConstantColumn(70); c.ConstantColumn(70); c.ConstantColumn(70);
+                    });
+
+                    table.Cell().Element(TH).Text("Tipo").Bold().FontSize(6f);
+                    table.Cell().Element(TH).Text("Clave").Bold().FontSize(6f);
+                    table.Cell().Element(TH).AlignLeft().Text("Concepto").Bold().FontSize(6f);
+                    table.Cell().Element(TH).Text("Gravado").Bold().FontSize(6f);
+                    table.Cell().Element(TH).Text("Exento").Bold().FontSize(6f);
+                    table.Cell().Element(TH).Text("Total").Bold().FontSize(6f);
+
+                    foreach (var p in n.Percepciones)
+                    {
+                        var total = (p.ImporteGravado ?? 0m) + (p.ImporteExento ?? 0m);
+                        table.Cell().Element(TDC).Text(p.TipoPercepcion ?? "-").FontSize(5.5f);
+                        table.Cell().Element(TDC).Text(p.Clave ?? "-").FontSize(5.5f);
+                        table.Cell().Element(TD).Text(p.Concepto ?? "-").FontSize(5.5f);
+                        table.Cell().Element(TDR).Text(FormatMoney(p.ImporteGravado ?? 0m)).FontSize(5.5f);
+                        table.Cell().Element(TDR).Text(FormatMoney(p.ImporteExento ?? 0m)).FontSize(5.5f);
+                        table.Cell().Element(TDR).Text(FormatMoney(total)).FontSize(5.5f);
+                    }
+
+                    table.Cell().ColumnSpan(3).Element(TotRow).AlignRight().Text("Totales").Bold().FontSize(6f);
+                    table.Cell().Element(TotRow).Text(FormatMoney(n.TotalGravado ?? 0m)).Bold().FontSize(6f);
+                    table.Cell().Element(TotRow).Text(FormatMoney(n.TotalExento ?? 0m)).Bold().FontSize(6f);
+                    table.Cell().Element(TotRow).Text(FormatMoney(n.TotalPercepciones ?? 0m)).Bold().FontSize(6f);
+                });
+            }
+
+            // ── Deducciones ───────────────────────────────────────────────────
+            if (n.Deducciones.Count > 0)
+            {
+                col.Item().PaddingBottom(2).Text("Deducciones").Bold().FontSize(8f);
+                col.Item().PaddingBottom(6).Table(table =>
+                {
+                    table.ColumnsDefinition(c =>
+                    {
+                        c.ConstantColumn(30); c.ConstantColumn(36); c.RelativeColumn(); c.ConstantColumn(80);
+                    });
+
+                    table.Cell().Element(TH).Text("Tipo").Bold().FontSize(6f);
+                    table.Cell().Element(TH).Text("Clave").Bold().FontSize(6f);
+                    table.Cell().Element(TH).AlignLeft().Text("Concepto").Bold().FontSize(6f);
+                    table.Cell().Element(TH).Text("Importe").Bold().FontSize(6f);
+
+                    foreach (var d in n.Deducciones)
+                    {
+                        table.Cell().Element(TDC).Text(d.TipoDeduccion ?? "-").FontSize(5.5f);
+                        table.Cell().Element(TDC).Text(d.Clave ?? "-").FontSize(5.5f);
+                        table.Cell().Element(TD).Text(d.Concepto ?? "-").FontSize(5.5f);
+                        table.Cell().Element(TDR).Text(FormatMoney(d.Importe ?? 0m)).FontSize(5.5f);
+                    }
+
+                    table.Cell().ColumnSpan(3).Element(TotRow).AlignRight().Text("Total deducciones").Bold().FontSize(6f);
+                    table.Cell().Element(TotRow).Text(FormatMoney(n.TotalDeducciones ?? 0m)).Bold().FontSize(6f);
+                });
+            }
+
+            // ── Otros pagos ───────────────────────────────────────────────────
+            if (n.OtrosPagos.Count > 0)
+            {
+                col.Item().PaddingBottom(2).Text("Otros pagos").Bold().FontSize(8f);
+                col.Item().PaddingBottom(6).Table(table =>
+                {
+                    table.ColumnsDefinition(c =>
+                    {
+                        c.ConstantColumn(30); c.ConstantColumn(36); c.RelativeColumn(); c.ConstantColumn(80);
+                    });
+
+                    table.Cell().Element(TH).Text("Tipo").Bold().FontSize(6f);
+                    table.Cell().Element(TH).Text("Clave").Bold().FontSize(6f);
+                    table.Cell().Element(TH).AlignLeft().Text("Concepto").Bold().FontSize(6f);
+                    table.Cell().Element(TH).Text("Importe").Bold().FontSize(6f);
+
+                    foreach (var o in n.OtrosPagos)
+                    {
+                        table.Cell().Element(TDC).Text(o.TipoOtroPago ?? "-").FontSize(5.5f);
+                        table.Cell().Element(TDC).Text(o.Clave ?? "-").FontSize(5.5f);
+                        table.Cell().Element(TD).Text(o.Concepto ?? "-").FontSize(5.5f);
+                        table.Cell().Element(TDR).Text(FormatMoney(o.Importe ?? 0m)).FontSize(5.5f);
+                    }
+
+                    table.Cell().ColumnSpan(3).Element(TotRow).AlignRight().Text("Total otros pagos").Bold().FontSize(6f);
+                    table.Cell().Element(TotRow).Text(FormatMoney(n.TotalOtrosPagos ?? 0m)).Bold().FontSize(6f);
+                });
+            }
+
+            // ── Resumen: datos de pago + totales nómina ──────────────────────
+            var neto = (n.TotalPercepciones ?? 0m) - (n.TotalDeducciones ?? 0m) + (n.TotalOtrosPagos ?? 0m);
+            col.Item().PaddingTop(4).PaddingBottom(4).Row(row =>
+            {
+                row.RelativeItem().Column(left =>
+                {
+                    left.Item().Element(c => NominaField(c, "Moneda:", DescripcionMoneda(cfdi.Moneda)));
+                    left.Item().Element(c => NominaField(c, "Forma de pago:", DescripcionFormaPago(cfdi.FormaPago)));
+                    left.Item().Element(c => NominaField(c, "Método de pago:", DescripcionMetodoPago(cfdi.MetodoPago)));
+                });
+                row.ConstantItem(270).Column(res =>
+                {
+                    res.Item().Element(line => TotalDetailRow(line, "Total percepciones", string.Empty, string.Empty, n.TotalPercepciones ?? 0m));
+                    res.Item().Element(line => TotalDetailRow(line, "Total deducciones", string.Empty, string.Empty, -(n.TotalDeducciones ?? 0m)));
+                    if ((n.TotalOtrosPagos ?? 0m) != 0m)
+                        res.Item().Element(line => TotalDetailRow(line, "Otros pagos", string.Empty, string.Empty, n.TotalOtrosPagos ?? 0m));
+                    res.Item().Element(line => TotalDetailRow(line, "Neto a pagar", string.Empty, string.Empty, neto, true));
+                });
+            });
+        });
+    }
+
+    private static void NominaField(IContainer container, string label, string? value)
+    {
+        container.PaddingBottom(2).Row(row =>
+        {
+            row.ConstantItem(110).Text(label).Bold().FontSize(6.5f);
+            row.RelativeItem().Text(string.IsNullOrWhiteSpace(value) ? "-" : value).FontSize(6.5f);
+        });
+    }
+
+    private static string DescripcionTipoNomina(string? tipo) => tipo switch
+    {
+        "O" => "Ordinaria",
+        "E" => "Extraordinaria",
+        _   => ValueOrDash(tipo)
+    };
+
+    private static string DescripcionTipoContrato(string? c) => c switch
+    {
+        "01" => "Tiempo indeterminado",
+        "02" => "Obra determinada",
+        "03" => "Tiempo determinado",
+        "04" => "Temporada",
+        "05" => "A prueba",
+        "06" => "Capacitación inicial",
+        "07" => "Por hora",
+        "08" => "Comisión laboral",
+        "09" => "Sin relación de trabajo",
+        "10" => "Jubilación / pensión",
+        "99" => "Otro",
+        _    => ValueOrDash(c)
+    };
+
+    private static string DescripcionTipoJornada(string? j) => j switch
+    {
+        "01" => "Diurna",
+        "02" => "Nocturna",
+        "03" => "Mixta",
+        "04" => "Por hora",
+        "05" => "Reducida",
+        "06" => "Continuada",
+        "07" => "Partida",
+        "08" => "Por turnos",
+        "99" => "Otra",
+        _    => ValueOrDash(j)
+    };
+
+    private static string DescripcionPeriodicidadPago(string? p) => p switch
+    {
+        "01" => "Diario",
+        "02" => "Semanal",
+        "03" => "Catorcenal",
+        "04" => "Quincenal",
+        "05" => "Mensual",
+        "06" => "Bimestral",
+        "07" => "Unidad obra",
+        "08" => "Comisión",
+        "09" => "Precio alzado",
+        "10" => "Decenal",
+        "99" => "Otra",
+        _    => ValueOrDash(p)
+    };
 
     private static void ComposeComplementoPago(IContainer container, CfdiPdfData cfdi)
     {

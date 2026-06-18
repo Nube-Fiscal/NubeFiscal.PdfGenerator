@@ -191,12 +191,112 @@ public static class CfdiXmlParser
                 var pagosEl = complemento.Element(pagoNs + "Pagos");
                 if (pagosEl != null)
                     cfdi.ComplementoPago = ParseComplementoPago(pagosEl, pagoNs);
+
+                XNamespace nominaNs = "http://www.sat.gob.mx/nomina12";
+                var nominaEl = complemento.Element(nominaNs + "Nomina");
+                if (nominaEl != null)
+                    cfdi.ComplementoNomina = ParseComplementoNomina(nominaEl, nominaNs);
             }
         }
         catch (Exception ex)
         {
             Console.WriteLine($"[NubeFiscal.PdfGenerator] WARN: Error parseando XML para UUID={cfdi.UUID}: {ex.Message}");
         }
+    }
+
+    private static ComplementoNominaPdf ParseComplementoNomina(XElement nominaEl, XNamespace ns)
+    {
+        static decimal? D(string? s) =>
+            decimal.TryParse(s, System.Globalization.NumberStyles.Any,
+                System.Globalization.CultureInfo.InvariantCulture, out var v) ? v : null;
+
+        var nomina = new ComplementoNominaPdf
+        {
+            Version           = nominaEl.Attribute("Version")?.Value ?? "1.2",
+            TipoNomina        = nominaEl.Attribute("TipoNomina")?.Value,
+            NumDiasPagados    = D(nominaEl.Attribute("NumDiasPagados")?.Value),
+            TotalPercepciones = D(nominaEl.Attribute("TotalPercepciones")?.Value),
+            TotalDeducciones  = D(nominaEl.Attribute("TotalDeducciones")?.Value),
+            TotalOtrosPagos   = D(nominaEl.Attribute("TotalOtrosPagos")?.Value),
+        };
+
+        if (DateTime.TryParse(nominaEl.Attribute("FechaPago")?.Value, out var fp))        nomina.FechaPago        = fp;
+        if (DateTime.TryParse(nominaEl.Attribute("FechaInicialPago")?.Value, out var fi)) nomina.FechaInicialPago = fi;
+        if (DateTime.TryParse(nominaEl.Attribute("FechaFinalPago")?.Value, out var ff))   nomina.FechaFinalPago   = ff;
+
+        var emisorEl = nominaEl.Element(ns + "Emisor");
+        if (emisorEl != null)
+            nomina.RegistroPatronal = emisorEl.Attribute("RegistroPatronal")?.Value;
+
+        var receptorEl = nominaEl.Element(ns + "Receptor");
+        if (receptorEl != null)
+        {
+            nomina.Curp                   = receptorEl.Attribute("Curp")?.Value;
+            nomina.NumSeguridadSocial     = receptorEl.Attribute("NumSeguridadSocial")?.Value;
+            nomina.Antiguedad             = receptorEl.Attribute("Antigüedad")?.Value
+                                           ?? receptorEl.Attribute("Antiguedad")?.Value;
+            nomina.TipoContrato           = receptorEl.Attribute("TipoContrato")?.Value;
+            nomina.TipoJornada            = receptorEl.Attribute("TipoJornada")?.Value;
+            nomina.TipoRegimen            = receptorEl.Attribute("TipoRegimen")?.Value;
+            nomina.NumEmpleado            = receptorEl.Attribute("NumEmpleado")?.Value;
+            nomina.Departamento           = receptorEl.Attribute("Departamento")?.Value;
+            nomina.Puesto                 = receptorEl.Attribute("Puesto")?.Value;
+            nomina.PeriodicidadPago       = receptorEl.Attribute("PeriodicidadPago")?.Value;
+            nomina.ClaveEntFed            = receptorEl.Attribute("ClaveEntFed")?.Value;
+            nomina.SalarioBaseCotApor     = D(receptorEl.Attribute("SalarioBaseCotApor")?.Value);
+            nomina.SalarioDiarioIntegrado = D(receptorEl.Attribute("SalarioDiarioIntegrado")?.Value);
+            if (DateTime.TryParse(receptorEl.Attribute("FechaInicioRelLaboral")?.Value, out var frl))
+                nomina.FechaInicioRelLaboral = frl;
+        }
+
+        var percepcionesEl = nominaEl.Element(ns + "Percepciones");
+        if (percepcionesEl != null)
+        {
+            nomina.TotalSueldos = D(percepcionesEl.Attribute("TotalSueldos")?.Value);
+            nomina.TotalGravado = D(percepcionesEl.Attribute("TotalGravado")?.Value);
+            nomina.TotalExento  = D(percepcionesEl.Attribute("TotalExento")?.Value);
+            foreach (var pEl in percepcionesEl.Elements(ns + "Percepcion"))
+            {
+                nomina.Percepciones.Add(new PercepcionNominaPdf
+                {
+                    TipoPercepcion = pEl.Attribute("TipoPercepcion")?.Value,
+                    Clave          = pEl.Attribute("Clave")?.Value,
+                    Concepto       = pEl.Attribute("Concepto")?.Value,
+                    ImporteGravado = D(pEl.Attribute("ImporteGravado")?.Value),
+                    ImporteExento  = D(pEl.Attribute("ImporteExento")?.Value),
+                });
+            }
+        }
+
+        var deduccionesEl = nominaEl.Element(ns + "Deducciones");
+        if (deduccionesEl != null)
+        {
+            nomina.TotalOtrasDeducciones  = D(deduccionesEl.Attribute("TotalOtrasDeducciones")?.Value);
+            nomina.TotalImpuestosRetenidos = D(deduccionesEl.Attribute("TotalImpuestosRetenidos")?.Value);
+            foreach (var dEl in deduccionesEl.Elements(ns + "Deduccion"))
+            {
+                nomina.Deducciones.Add(new DeduccionNominaPdf
+                {
+                    TipoDeduccion = dEl.Attribute("TipoDeduccion")?.Value,
+                    Clave         = dEl.Attribute("Clave")?.Value,
+                    Concepto      = dEl.Attribute("Concepto")?.Value,
+                    Importe       = D(dEl.Attribute("Importe")?.Value),
+                });
+            }
+        }
+
+        foreach (var oEl in nominaEl.Element(ns + "OtrosPagos")?.Elements(ns + "OtroPago") ?? [])
+        {
+            nomina.OtrosPagos.Add(new OtroPagoNominaPdf
+            {
+                TipoOtroPago = oEl.Attribute("TipoOtroPago")?.Value,
+                Clave        = oEl.Attribute("Clave")?.Value,
+                Concepto     = oEl.Attribute("Concepto")?.Value,
+                Importe      = D(oEl.Attribute("Importe")?.Value),
+            });
+        }
+
+        return nomina;
     }
 
     private static void TryDecimal(string? s, out decimal? result)
