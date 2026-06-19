@@ -5,6 +5,7 @@ Genera representaciones impresas en PDF de **CFDIs 4.0 del SAT** de México, cum
 [![NuGet](https://img.shields.io/nuget/v/NubeFiscal.PdfGenerator)](https://www.nuget.org/packages/NubeFiscal.PdfGenerator)
 [![NuGet Downloads](https://img.shields.io/nuget/dt/NubeFiscal.PdfGenerator)](https://www.nuget.org/packages/NubeFiscal.PdfGenerator)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![build](https://github.com/Nube-Fiscal/NubeFiscal.PdfGenerator/actions/workflows/build.yml/badge.svg)](https://github.com/Nube-Fiscal/NubeFiscal.PdfGenerator/actions/workflows/build.yml)
 
 ---
 
