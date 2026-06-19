@@ -333,10 +333,10 @@ var pdfBytes = PdfBuilder.Construir(cfdi);
 
 ## Ejemplos
 
-La carpeta `samples/` contiene un proyecto de consola que genera 4 PDFs de demostración con datos ficticios, uno por cada tipo de comprobante soportado.
+La carpeta `Samples/` contiene un proyecto de consola que genera 4 PDFs de demostración con datos ficticios, uno por cada tipo de comprobante soportado.
 
 ```bash
-dotnet run --project samples/NubeFiscal.PdfGenerator.Samples.csproj
+dotnet run --project Samples/NubeFiscal.PdfGenerator.Samples.csproj
 ```
 
 Los archivos se generan en `Docs/` en la raíz del proyecto:
