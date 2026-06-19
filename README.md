@@ -339,14 +339,14 @@ La carpeta `samples/` contiene un proyecto de consola que genera 4 PDFs de demos
 dotnet run --project samples/NubeFiscal.PdfGenerator.Samples.csproj
 ```
 
-Los archivos se generan en `docs/` en la raíz del proyecto:
+Los archivos se generan en `Docs/` en la raíz del proyecto:
 
 | Archivo | Descripción |
 |---|---|
-| [1-ingreso-multiconcepto.pdf](docs/1-ingreso-multiconcepto.pdf) | Ingreso con 9 conceptos: diésel, lubricantes, filtros, servicios, un concepto exento y uno con tasa 0% |
-| [2-complemento-pago.pdf](docs/2-complemento-pago.pdf) | Complemento de Pago 2.0 con 2 pagos y sus documentos relacionados |
-| [3-retenciones.pdf](docs/3-retenciones.pdf) | Ingreso con retenciones de ISR e IVA por concepto (honorarios profesionales) |
-| [4-nomina.pdf](docs/4-nomina.pdf) | Nómina quincenal con 4 percepciones, 3 deducciones y subsidio al empleo |
+| [1-ingreso-multiconcepto.pdf](Docs/1-ingreso-multiconcepto.pdf) | Ingreso con 9 conceptos: diésel, lubricantes, filtros, servicios, un concepto exento y uno con tasa 0% |
+| [2-complemento-pago.pdf](Docs/2-complemento-pago.pdf) | Complemento de Pago 2.0 con 2 pagos y sus documentos relacionados |
+| [3-retenciones.pdf](Docs/3-retenciones.pdf) | Ingreso con retenciones de ISR e IVA por concepto (honorarios profesionales) |
+| [4-nomina.pdf](Docs/4-nomina.pdf) | Nómina quincenal con 4 percepciones, 3 deducciones y subsidio al empleo |
 
 ---
 
