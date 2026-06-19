@@ -23,6 +23,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="samples\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="QuestPDF" Version="2024.10.4" />
     <PackageReference Include="QRCoder" Version="1.6.0" />
   </ItemGroup>

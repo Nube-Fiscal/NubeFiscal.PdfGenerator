@@ -70,10 +70,7 @@ public static class PdfBuilder
             }
 
             if (esComplementoPago)
-            {
-                col.Item().PaddingTop(4).Element(container => ComposeComplementoPago(container, cfdi));
-                col.Item().PageBreak();
-            }
+                col.Item().PaddingTop(4).PaddingBottom(22).Element(container => ComposeComplementoPago(container, cfdi));
 
             if (esNomina)
                 col.Item().PaddingTop(6).Element(container => ComposeComplementoNomina(container, cfdi));

@@ -93,6 +93,7 @@ Es el único NuGet con soporte completo para el diseño oficial del SAT CFDI 4.0
 | Egreso (E) | ✅ |
 | Traslado (T) | ✅ |
 | Pago — Complemento de Pago 2.0 (P) | ✅ |
+| Nómina — Complemento de Nómina 1.2 (N) | ✅ |
 | Múltiples conceptos con impuestos por concepto | ✅ |
 | Comprobantes cancelados con fecha de cancelación | ✅ |
 | Exportación (No aplica / Definitiva / Temporal) | ✅ |
@@ -229,6 +230,123 @@ cfdi.ComplementoPago = new ComplementoPagoPdf
     ]
 };
 ```
+
+### Complemento de Nómina 1.2
+
+Cuando `TipoComprobante = "N"` y el XML incluye el complemento de nómina, se parsea y renderiza automáticamente desde `CfdiXmlParser.FromXml()`. Para construirlo manualmente:
+
+```csharp
+cfdi.TipoComprobante = "N";
+cfdi.ComplementoNomina = new ComplementoNominaPdf
+{
+    Version           = "1.2",
+    TipoNomina        = "O",                         // O = Ordinaria, E = Extraordinaria
+    FechaPago         = new DateTime(2024, 6, 15),
+    FechaInicialPago  = new DateTime(2024, 6, 1),
+    FechaFinalPago    = new DateTime(2024, 6, 15),
+    NumDiasPagados    = 15m,
+    TotalPercepciones = 18000m,
+    TotalDeducciones  = 3500m,
+    TotalOtrosPagos   = 405.01m,
+
+    // Datos del emisor (empresa)
+    RegistroPatronal  = "C4512345678",
+
+    // Datos del receptor (trabajador)
+    Curp                   = "LOAJ840101HDFPRS09",
+    NumSeguridadSocial     = "12345678900",
+    FechaInicioRelLaboral  = new DateTime(2015, 3, 1),
+    Antiguedad             = "P471W",                // formato ISO 8601 duration
+    TipoContrato           = "01",                   // Contrato de trabajo por tiempo indeterminado
+    TipoJornada            = "01",                   // Diurna
+    TipoRegimen            = "02",                   // Sueldos y salarios
+    NumEmpleado            = "EMP-001",
+    Departamento           = "Tecnología",
+    Puesto                 = "Desarrollador Senior",
+    PeriodicidadPago       = "04",                   // Quincenal
+    SalarioBaseCotApor     = 1200m,
+    SalarioDiarioIntegrado = 1350m,
+    ClaveEntFed            = "CMX",
+
+    // Percepciones
+    TotalSueldos = 18000m,
+    TotalGravado = 12000m,
+    TotalExento  = 6000m,
+    Percepciones =
+    [
+        new PercepcionNominaPdf
+        {
+            TipoPercepcion = "001",   // Sueldos, Salarios  Rayas y Jornales
+            Clave          = "001",
+            Concepto       = "Sueldo quincenal",
+            ImporteGravado = 12000m,
+            ImporteExento  = 0m
+        },
+        new PercepcionNominaPdf
+        {
+            TipoPercepcion = "019",   // Horas extra
+            Clave          = "002",
+            Concepto       = "Prima vacacional",
+            ImporteGravado = 0m,
+            ImporteExento  = 6000m
+        }
+    ],
+
+    // Deducciones
+    TotalOtrasDeducciones  = 1500m,
+    TotalImpuestosRetenidos = 2000m,
+    Deducciones =
+    [
+        new DeduccionNominaPdf
+        {
+            TipoDeduccion = "002",    // ISR
+            Clave         = "001",
+            Concepto      = "ISR",
+            Importe       = 2000m
+        },
+        new DeduccionNominaPdf
+        {
+            TipoDeduccion = "001",    // Seguridad social
+            Clave         = "002",
+            Concepto      = "IMSS",
+            Importe       = 1500m
+        }
+    ],
+
+    // Otros pagos (p.ej. subsidio al empleo)
+    OtrosPagos =
+    [
+        new OtroPagoNominaPdf
+        {
+            TipoOtroPago = "002",     // Subsidio para el empleo aplicado
+            Clave        = "001",
+            Concepto     = "Subsidio al empleo",
+            Importe      = 405.01m
+        }
+    ]
+};
+
+var pdfBytes = PdfBuilder.Construir(cfdi);
+```
+
+---
+
+## Ejemplos
+
+La carpeta `samples/` contiene un proyecto de consola que genera 4 PDFs de demostración con datos ficticios, uno por cada tipo de comprobante soportado.
+
+```bash
+dotnet run --project samples/NubeFiscal.PdfGenerator.Samples.csproj
+```
+
+Los archivos se generan en `docs/` en la raíz del proyecto:
+
+| Archivo | Descripción |
+|---|---|
+| [1-ingreso-multiconcepto.pdf](docs/1-ingreso-multiconcepto.pdf) | Ingreso con 9 conceptos: diésel, lubricantes, filtros, servicios, un concepto exento y uno con tasa 0% |
+| [2-complemento-pago.pdf](docs/2-complemento-pago.pdf) | Complemento de Pago 2.0 con 2 pagos y sus documentos relacionados |
+| [3-retenciones.pdf](docs/3-retenciones.pdf) | Ingreso con retenciones de ISR e IVA por concepto (honorarios profesionales) |
+| [4-nomina.pdf](docs/4-nomina.pdf) | Nómina quincenal con 4 percepciones, 3 deducciones y subsidio al empleo |
 
 ---
 
