@@ -1,5 +1,6 @@
 namespace NubeFiscal.PdfGenerator.Models;
 
+/// <summary>Modelo principal del CFDI. Contiene todos los campos necesarios para generar la representación impresa en PDF.</summary>
 public class CfdiPdfData
 {
     public long Id { get; set; }

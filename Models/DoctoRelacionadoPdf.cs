@@ -1,5 +1,6 @@
 namespace NubeFiscal.PdfGenerator.Models;
 
+/// <summary>Factura o comprobante que se liquida con un pago. Cada <see cref="PagoPdf"/> puede relacionar uno o más documentos.</summary>
 public class DoctoRelacionadoPdf
 {
     public string? IdDocumento { get; set; }

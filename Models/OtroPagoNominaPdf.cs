@@ -1,5 +1,6 @@
 namespace NubeFiscal.PdfGenerator.Models;
 
+/// <summary>Otro pago aplicado al empleado (p. ej. subsidio al empleo). Se muestra en la tabla de Otros Pagos y suma al neto a pagar.</summary>
 public class OtroPagoNominaPdf
 {
     public string? TipoOtroPago { get; set; }

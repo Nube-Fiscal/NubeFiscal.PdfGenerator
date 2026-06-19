@@ -1,5 +1,6 @@
 namespace NubeFiscal.PdfGenerator.Models;
 
+/// <summary>Impuesto desglosado (base, tasa y importe) usado en traslados y retenciones de documentos relacionados (<c>TrasladosDR</c>, <c>RetencionesDR</c>) y del pago (<c>TrasladosP</c>).</summary>
 public class ImpuestoPagoDetalladoPdf
 {
     public string? Impuesto { get; set; }

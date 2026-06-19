@@ -1,5 +1,6 @@
 namespace NubeFiscal.PdfGenerator.Models;
 
+/// <summary>Totales globales del Complemento de Pago 2.0. Se muestra en la tabla de totales encima de la lista de pagos.</summary>
 public class TotalesPagoPdf
 {
     public decimal? TotalRetencionesIVA { get; set; }

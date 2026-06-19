@@ -1,5 +1,6 @@
 namespace NubeFiscal.PdfGenerator.Models;
 
+/// <summary>Raíz del Complemento de Nómina 1.2. Poblado únicamente cuando <c>TipoComprobante == "N"</c>. Incluye datos del patrón, del empleado, percepciones, deducciones y otros pagos.</summary>
 public class ComplementoNominaPdf
 {
     public string Version { get; set; } = "1.2";

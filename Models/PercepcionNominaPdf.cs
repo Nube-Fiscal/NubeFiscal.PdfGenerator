@@ -1,5 +1,6 @@
 namespace NubeFiscal.PdfGenerator.Models;
 
+/// <summary>Concepto de percepción (sueldo, prima, bono, etc.) del Complemento de Nómina. Se muestra en la tabla de Percepciones con importes gravado y exento.</summary>
 public class PercepcionNominaPdf
 {
     public string? TipoPercepcion { get; set; }

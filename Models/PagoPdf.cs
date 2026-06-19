@@ -1,5 +1,6 @@
 namespace NubeFiscal.PdfGenerator.Models;
 
+/// <summary>Representa un pago individual dentro del Complemento de Pago 2.0. Un comprobante puede tener múltiples pagos.</summary>
 public class PagoPdf
 {
     public DateTime? FechaPago { get; set; }

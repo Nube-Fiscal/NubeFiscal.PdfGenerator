@@ -1,5 +1,6 @@
 namespace NubeFiscal.PdfGenerator.Models;
 
+/// <summary>Representa una línea de concepto del CFDI. Corresponde a la sección ⑤ Conceptos del diseño oficial del SAT.</summary>
 public class ConceptoPdf
 {
     public string? ClaveProdServ { get; set; }
