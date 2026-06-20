@@ -443,12 +443,13 @@ Actualmente lo uso en producción en cuatro proyectos propios: dos de facturaci�
 | Usuario | Proyecto |
 |---|---|
 | [@jonas1ara](https://github.com/jonas1ara) | [NubeFiscal](https://github.com/Nube-Fiscal) |
+| [@jonas1ara](https://github.com/jonas1ara) | [NubeFiscal](https://github.com/RhSoft-mx) |
 
 ---
 
 ## Contribuciones
 
-¡Las PRs son bienvenidas! Si tienes mejoras al diseño, soporte para nuevos complementos, correcciones o cualquier idea, adelante:
+¡Las PRs son bienvenidas! Si tienes mejoras al diseño, soporte para nuevos complementos, correcciones o cualquier idea, con mucho gusto la revisaré:
 
 1. Haz fork del repositorio
 2. Crea tu rama: `git checkout -b mi-mejora`
