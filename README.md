@@ -6,6 +6,7 @@ Genera representaciones impresas en PDF de **CFDIs 4.0 del SAT** de México, cum
 [![NuGet Downloads](https://img.shields.io/nuget/dt/NubeFiscal.PdfGenerator)](https://www.nuget.org/packages/NubeFiscal.PdfGenerator)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![build](https://github.com/Nube-Fiscal/NubeFiscal.PdfGenerator/actions/workflows/build.yml/badge.svg)](https://github.com/Nube-Fiscal/NubeFiscal.PdfGenerator/actions/workflows/build.yml)
+[![publish](https://github.com/Nube-Fiscal/NubeFiscal.PdfGenerator/actions/workflows/publish.yml/badge.svg)](https://github.com/Nube-Fiscal/NubeFiscal.PdfGenerator/actions/workflows/publish.yml)
 
 ---
 
@@ -191,7 +192,10 @@ CfdiXmlParser.EnriquecerDesdeXml(cfdi); // sobrescribe solo lo que parsea del XM
 var pdfBytes = PdfBuilder.Construir(cfdi);
 ```
 
-### Complemento de Pago 2.0
+<details>
+<summary><strong>Complemento de Pago 2.0</strong></summary>
+
+<br>
 
 Cuando `TipoComprobante = "P"` y el XML incluye el complemento de pago, se parsea y renderiza automáticamente desde `CfdiXmlParser.FromXml()`. Para construirlo manualmente:
 
@@ -232,7 +236,14 @@ cfdi.ComplementoPago = new ComplementoPagoPdf
 };
 ```
 
-### Complemento de Nómina 1.2
+</details>
+
+---
+
+<details>
+<summary><strong>Complemento de Nómina 1.2</strong></summary>
+
+<br>
 
 Cuando `TipoComprobante = "N"` y el XML incluye el complemento de nómina, se parsea y renderiza automáticamente desde `CfdiXmlParser.FromXml()`. Para construirlo manualmente:
 
@@ -330,6 +341,8 @@ cfdi.ComplementoNomina = new ComplementoNominaPdf
 var pdfBytes = PdfBuilder.Construir(cfdi);
 ```
 
+</details>
+
 ---
 
 ## Ejemplos
@@ -342,29 +355,49 @@ dotnet run --project Samples/NubeFiscal.PdfGenerator.Samples.csproj
 
 Los archivos se generan en `Docs/` en la raíz del proyecto.
 
-### Ingreso con múltiples conceptos
+<details>
+<summary><strong>Ingreso con múltiples conceptos</strong></summary>
+
+<br>
 
 <img width="686" height="926" alt="1-ingreso-multiconcepto" src="https://github.com/user-attachments/assets/22049866-38b8-4c8b-8e8b-32c513921ede" />
 
 [Ver PDF de ejemplo](docs/1-ingreso-multiconcepto.pdf) — 9 conceptos: diésel, lubricantes, filtros, servicios, un concepto exento y uno con tasa 0%
 
-### Complemento de Pago 2.0
+</details>
+
+<details>
+<summary><strong>Complemento de Pago 2.0</strong></summary>
+
+<br>
 
 <img width="549" height="757" alt="2-complemento-pago" src="https://github.com/user-attachments/assets/ba15b536-2982-4f2c-9e37-251db508e0e3" />
 
 [Ver PDF de ejemplo](docs/2-complemento-pago.pdf) — 2 pagos con documentos relacionados e impuestos del DR
 
-### Retenciones (ISR + IVA)
+</details>
+
+<details>
+<summary><strong>Retenciones (ISR + IVA)</strong></summary>
+
+<br>
 
 <img width="706" height="884" alt="3-retenciones" src="https://github.com/user-attachments/assets/528baf9c-7e02-450a-a500-83d260273d68" />
 
 [Ver PDF de ejemplo](docs/3-retenciones.pdf) — Honorarios profesionales con ISR e IVA retenido por concepto
 
-### Nómina — Complemento de Nómina 1.2
+</details>
+
+<details>
+<summary><strong>Nómina — Complemento de Nómina 1.2</strong></summary>
+
+<br>
 
 <img width="622" height="854" alt="4-nomina" src="https://github.com/user-attachments/assets/0da8eca3-07ca-4390-b588-c0818a7575c2" />
 
 [Ver PDF de ejemplo](docs/4-nomina.pdf) — Nómina quincenal con 4 percepciones, 3 deducciones y subsidio al empleo
+
+</details>
 
 ---
 
