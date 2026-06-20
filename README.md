@@ -442,8 +442,8 @@ Actualmente lo uso en producción en cuatro proyectos propios: dos de facturaci�
 
 | Usuario | Proyecto |
 |---|---|
-| [@jonas1ara](https://github.com/jonas1ara) | [NubeFiscal](https://github.com/Nube-Fiscal) |
-| [@jonas1ara](https://github.com/jonas1ara) | [NubeFiscal](https://github.com/RhSoft-mx) |
+| [@jonas1ara](https://github.com/jonas1ara) | [NubeFiscal — Tu contabilidad en la nube, siempre al día](https://github.com/Nube-Fiscal) |
+| [@jonas1ara](https://github.com/jonas1ara) | [RhSoft — Hacemos simple la administración de tu personal](https://github.com/RhSoft-mx) |
 
 ---
 
