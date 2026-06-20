@@ -8,7 +8,7 @@
 
     <!-- NuGet package metadata -->
     <PackageId>NubeFiscal.PdfGenerator</PackageId>
-    <Version>1.0.3</Version>
+    <Version>1.0.4</Version>
     <Authors>NubeFiscal</Authors>
     <Company>NubeFiscal</Company>
     <Product>NubeFiscal.PdfGenerator</Product>
