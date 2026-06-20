@@ -355,6 +355,8 @@ dotnet run --project Samples/NubeFiscal.PdfGenerator.Samples.csproj
 
 Los archivos se generan en `Docs/` en la raíz del proyecto.
 
+> **Aviso de privacidad** — Todos los RFC, nombres, CURP, NSS, importes y demás datos presentes en estos ejemplos son **estrictamente ficticios** y fueron generados con el único propósito de ilustrar el funcionamiento del paquete. Ningún dato corresponde a persona física o moral real. Este proyecto se desarrolla en cumplimiento de la [Ley Federal de Protección de Datos Personales en Posesión de los Particulares (LFPDPPP)](https://www.diputados.gob.mx/LeyesBiblio/pdf/LFPDPPP.pdf).
+
 <details>
 <summary><strong>Ingreso con múltiples conceptos</strong></summary>
 
@@ -362,7 +364,7 @@ Los archivos se generan en `Docs/` en la raíz del proyecto.
 
 <img width="686" height="926" alt="1-ingreso-multiconcepto" src="https://github.com/user-attachments/assets/22049866-38b8-4c8b-8e8b-32c513921ede" />
 
-[Ver PDF de ejemplo](docs/1-ingreso-multiconcepto.pdf) — 9 conceptos: diésel, lubricantes, filtros, servicios, un concepto exento y uno con tasa 0%
+[Ver PDF de ejemplo](Docs/1-ingreso-multiconcepto.pdf) — 9 conceptos: diésel, lubricantes, filtros, servicios, un concepto exento y uno con tasa 0%
 
 </details>
 
@@ -373,7 +375,7 @@ Los archivos se generan en `Docs/` en la raíz del proyecto.
 
 <img width="549" height="757" alt="2-complemento-pago" src="https://github.com/user-attachments/assets/ba15b536-2982-4f2c-9e37-251db508e0e3" />
 
-[Ver PDF de ejemplo](docs/2-complemento-pago.pdf) — 2 pagos con documentos relacionados e impuestos del DR
+[Ver PDF de ejemplo](Docs/2-complemento-pago.pdf) — 2 pagos con documentos relacionados e impuestos del DR
 
 </details>
 
@@ -384,7 +386,7 @@ Los archivos se generan en `Docs/` en la raíz del proyecto.
 
 <img width="706" height="884" alt="3-retenciones" src="https://github.com/user-attachments/assets/528baf9c-7e02-450a-a500-83d260273d68" />
 
-[Ver PDF de ejemplo](docs/3-retenciones.pdf) — Honorarios profesionales con ISR e IVA retenido por concepto
+[Ver PDF de ejemplo](Docs/3-retenciones.pdf) — Honorarios profesionales con ISR e IVA retenido por concepto
 
 </details>
 
@@ -395,7 +397,7 @@ Los archivos se generan en `Docs/` en la raíz del proyecto.
 
 <img width="622" height="854" alt="4-nomina" src="https://github.com/user-attachments/assets/0da8eca3-07ca-4390-b588-c0818a7575c2" />
 
-[Ver PDF de ejemplo](docs/4-nomina.pdf) — Nómina quincenal con 4 percepciones, 3 deducciones y subsidio al empleo
+[Ver PDF de ejemplo](Docs/4-nomina.pdf) — Nómina quincenal con 4 percepciones, 3 deducciones y subsidio al empleo
 
 </details>
 
@@ -431,6 +433,16 @@ El paquete resuelve automáticamente las claves del SAT a su descripción comple
 Trabajando en un proyecto propio necesitaba generar las representaciones gráficas de CFDIs a partir de sus XMLs. El problema: **ninguna librería gratuita las generaba con el diseño oficial del SAT**. La gran mayoría de las soluciones disponibles te obligan a pagar un servicio externo y esperar que te liberen un API Key para poder usarlo.
 
 Decidí construirlo desde cero, con el diseño correcto, y liberarlo como open source para que cualquier desarrollador en México pueda usarlo sin depender de terceros ni pagar por algo que debería ser libre.
+
+Actualmente lo uso en producción en cuatro proyectos propios: dos de facturación electrónica, uno de auditoría fiscal y uno de nómina. Cada release está validado contra casos reales antes de publicarse.
+
+**¿Lo usas en tu empresa o proyecto?** Me encantaría saberlo — abre un PR agregando tu proyecto a la lista:
+
+### Proyectos que usan este paquete
+
+| Usuario | Proyecto |
+|---|---|
+| [@jonas1ara](https://github.com/jonas1ara) | [NubeFiscal](https://github.com/Nube-Fiscal) |
 
 ---
 
