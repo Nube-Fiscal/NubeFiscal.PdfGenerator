@@ -19,10 +19,13 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Restore
-        run: dotnet restore NubeFiscal.PdfGenerator.csproj
+        run: dotnet restore
 
       - name: Build
-        run: dotnet build NubeFiscal.PdfGenerator.csproj --no-restore -c Release
+        run: dotnet build --no-restore -c Release
+
+      - name: Test
+        run: dotnet test Tests/NubeFiscal.PdfGenerator.Tests.csproj --no-build -c Release --verbosity normal
 
       - name: Pack
         run: dotnet pack NubeFiscal.PdfGenerator.csproj --no-build -c Release

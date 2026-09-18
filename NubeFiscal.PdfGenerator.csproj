@@ -24,6 +24,11 @@
 
   <ItemGroup>
     <Compile Remove="samples\**" />
+    <Compile Remove="Tests\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="NubeFiscal.PdfGenerator.Tests" />
   </ItemGroup>
 
   <ItemGroup>

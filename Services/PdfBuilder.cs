@@ -624,7 +624,7 @@ public static class PdfBuilder
         });
     }
 
-    private static string FormatearAntiguedad(string? antiguedad)
+    internal static string FormatearAntiguedad(string? antiguedad)
     {
         if (string.IsNullOrWhiteSpace(antiguedad))
             return "-";

@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/Samples/">
+    <Project Path="Samples/NubeFiscal.PdfGenerator.Samples.csproj" />
+  </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="Tests/NubeFiscal.PdfGenerator.Tests.csproj" />
+  </Folder>
+  <Project Path="NubeFiscal.PdfGenerator.csproj" />
+</Solution>
