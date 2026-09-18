@@ -5,6 +5,7 @@ using QRCoder;
 using NubeFiscal.PdfGenerator.Models;
 using System.Globalization;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace NubeFiscal.PdfGenerator.Services;
 
@@ -52,16 +53,16 @@ public static class PdfBuilder
             }
 
             col.Item().PaddingTop(6).Element(container => ComposeSatHeader(container, cfdi));
-            col.Item().PaddingTop(6).PaddingLeft(4).PaddingRight(4).Text("Conceptos").Bold().FontSize(9.5f);
-            col.Item().PaddingTop(20).Element(container => ComposeConceptosTable(container, cfdi));
-
             bool esComplementoPago = string.Equals(cfdi.TipoComprobante, "P", StringComparison.OrdinalIgnoreCase)
                                      && cfdi.ComplementoPago is not null;
             bool esNomina = string.Equals(cfdi.TipoComprobante, "N", StringComparison.OrdinalIgnoreCase)
-                            && cfdi.ComplementoNomina is not null;
+                            || cfdi.ComplementoNomina is not null;
 
             if (!esNomina)
             {
+                col.Item().PaddingTop(6).PaddingLeft(4).PaddingRight(4).Text("Conceptos").Bold().FontSize(9.5f);
+                col.Item().PaddingTop(20).Element(container => ComposeConceptosTable(container, cfdi));
+
                 col.Item().PaddingTop(10).PaddingBottom(18).PaddingLeft(4).PaddingRight(4).Row(row =>
                 {
                     row.RelativeItem().Element(container => ComposeDatosPagoBox(container, cfdi, esComplementoPago));
@@ -72,7 +73,7 @@ public static class PdfBuilder
             if (esComplementoPago)
                 col.Item().PaddingTop(4).PaddingBottom(22).Element(container => ComposeComplementoPago(container, cfdi));
 
-            if (esNomina)
+            if (esNomina && cfdi.ComplementoNomina is not null)
                 col.Item().PaddingTop(6).Element(container => ComposeComplementoNomina(container, cfdi));
 
             col.Item().PaddingTop(6).Element(container => ComposeFinalSection(container, cfdi, qrBytes));
@@ -454,17 +455,17 @@ public static class PdfBuilder
             col.Item().PaddingBottom(6).Row(row =>
             {
                 // Patrón
-                row.RelativeItem().Column(patron =>
+                row.RelativeItem(1.15f).Column(patron =>
                 {
                     patron.Item().Background("#CFCFCF").Border(0.5f).Padding(2)
                           .Text("Datos del patrón").Bold().FontSize(7f);
-                    patron.Item().Element(c => NominaField(c, "Registro patronal:", n.RegistroPatronal));
+                    patron.Item().Element(c => NominaField(c, "Registro patronal:", n.RegistroPatronal, 68f, alignRight: true));
                 });
 
                 row.ConstantItem(6);
 
                 // Empleado
-                row.RelativeItem(3).Column(emp =>
+                row.RelativeItem(2.85f).Column(emp =>
                 {
                     emp.Item().Background("#CFCFCF").Border(0.5f).Padding(2)
                        .Text("Datos del empleado").Bold().FontSize(7f);
@@ -476,7 +477,7 @@ public static class PdfBuilder
                             left.Item().Element(c => NominaField(c, "CURP:", n.Curp));
                             left.Item().Element(c => NominaField(c, "NSS:", n.NumSeguridadSocial));
                             left.Item().Element(c => NominaField(c, "Inicio rel. laboral:", n.FechaInicioRelLaboral.HasValue ? n.FechaInicioRelLaboral.Value.ToString("dd/MM/yyyy") : null));
-                            left.Item().Element(c => NominaField(c, "Antigüedad:", n.Antiguedad));
+                            left.Item().Element(c => NominaField(c, "Antigüedad:", FormatearAntiguedad(n.Antiguedad)));
                             left.Item().Element(c => NominaField(c, "Entidad federativa:", n.ClaveEntFed));
                         });
                         r.ConstantItem(6);
@@ -611,13 +612,64 @@ public static class PdfBuilder
         });
     }
 
-    private static void NominaField(IContainer container, string label, string? value)
+    private static void NominaField(IContainer container, string label, string? value, float labelWidth = 78f, bool alignRight = false)
     {
         container.PaddingBottom(2).Row(row =>
         {
-            row.ConstantItem(110).Text(label).Bold().FontSize(6.5f);
-            row.RelativeItem().Text(string.IsNullOrWhiteSpace(value) ? "-" : value).FontSize(6.5f);
+            row.ConstantItem(labelWidth).Text(label).Bold().FontSize(6.5f);
+            var valItem = row.RelativeItem();
+            if (alignRight)
+                valItem = valItem.AlignRight();
+            valItem.Text(string.IsNullOrWhiteSpace(value) ? "-" : value).FontSize(6.5f);
         });
+    }
+
+    private static string FormatearAntiguedad(string? antiguedad)
+    {
+        if (string.IsNullOrWhiteSpace(antiguedad))
+            return "-";
+
+        var trimmed = antiguedad.Trim();
+
+        // Formato semanas: P[n]W (ej. P331W, P24W, P1W)
+        var matchSemanas = Regex.Match(trimmed, @"^P(\d+)W$", RegexOptions.IgnoreCase);
+        if (matchSemanas.Success && int.TryParse(matchSemanas.Groups[1].Value, out var semanas))
+        {
+            if (semanas == 0) return "0 semanas";
+            var anios = semanas / 52;
+            var semRestantes = semanas % 52;
+
+            if (anios > 0 && semRestantes > 0)
+                return $"{anios} {(anios == 1 ? "año" : "años")}, {semRestantes} {(semRestantes == 1 ? "semana" : "semanas")}";
+            if (anios > 0)
+                return $"{anios} {(anios == 1 ? "año" : "años")}";
+            return $"{semanas} {(semanas == 1 ? "semana" : "semanas")}";
+        }
+
+        // Formato años, meses, días: P[n]Y[n]M[n]D (ej. P10Y8M15D, P24D, P1Y, P6M)
+        var matchPeriodo = Regex.Match(trimmed, @"^P(?:(\d+)Y)?(?:(\d+)M)?(?:(\d+)D)?$", RegexOptions.IgnoreCase);
+        if (matchPeriodo.Success && matchPeriodo.Length == trimmed.Length && !string.Equals(trimmed, "P", StringComparison.OrdinalIgnoreCase))
+        {
+            var partes = new List<string>();
+
+            if (matchPeriodo.Groups[1].Success && int.TryParse(matchPeriodo.Groups[1].Value, out var y) && y > 0)
+                partes.Add($"{y} {(y == 1 ? "año" : "años")}");
+
+            if (matchPeriodo.Groups[2].Success && int.TryParse(matchPeriodo.Groups[2].Value, out var m) && m > 0)
+                partes.Add($"{m} {(m == 1 ? "mes" : "meses")}");
+
+            if (matchPeriodo.Groups[3].Success && int.TryParse(matchPeriodo.Groups[3].Value, out var d) && d > 0)
+                partes.Add($"{d} {(d == 1 ? "día" : "días")}");
+
+            if (partes.Count > 0)
+                return string.Join(", ", partes);
+
+            if (string.Equals(trimmed, "P0D", StringComparison.OrdinalIgnoreCase))
+                return "0 días";
+        }
+
+        // Si ya viene como texto legible o fecha, se regresa tal cual
+        return trimmed;
     }
 
     private static string DescripcionTipoNomina(string? tipo) => tipo switch
